@@ -73,7 +73,8 @@ def stripFormatting(collection) :
 
 # writes a list of strings to a file
 def list2file(string_set, filepath):
-    with open(filepath, 'wb') as csvfile:
+    with open(filepath, 'w') as csvfile:
         writer = csv.writer(csvfile, doublequote=True, quoting=csv.QUOTE_MINIMAL)
         for string in string_set:
             writer.writerow([string])
+
