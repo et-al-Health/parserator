@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 
 
-def consoleLabel(raw_strings, labels, module): 
+def consoleLabel(raw_strings, labels, module):
     print('\nStart console labeling!\n')
     valid_input_tags = OrderedDict([(str(i), label) for i, label in enumerate(labels)])
     printHelp(valid_input_tags)
@@ -35,10 +35,10 @@ def consoleLabel(raw_strings, labels, module):
             print('\n(%s of %s)' % (i, total_strings))
             print('-'*50)
             print('STRING: %s' %raw_sequence)
-            
+
             preds = module.parse(raw_sequence)
 
-            user_input = None 
+            user_input = None
             while user_input not in valid_responses :
 
                 friendly_repr = [(token[0].strip(), token[1]) for token in preds]
@@ -52,7 +52,7 @@ def consoleLabel(raw_strings, labels, module):
                     strings_left_to_tag.remove(raw_sequence)
 
                 elif user_input =='n':
-                    corrected_string = manualTagging(preds, 
+                    corrected_string = manualTagging(preds,
                                                 valid_input_tags)
                     tagged_strings.add(tuple(corrected_string))
                     strings_left_to_tag.remove(raw_sequence)
@@ -74,7 +74,7 @@ def print_table(table):
     for line in table:
         print(u"| %s |" % " | ".join(u"{:{}}".format(x, col_width[i])
                                      for i, x in enumerate(line)))
-        
+
 
 def manualTagging(preds, valid_input_tags):
     tagged_sequence = []
@@ -101,7 +101,7 @@ def manualTagging(preds, valid_input_tags):
     return tagged_sequence
 
 
-def naiveConsoleLabel(raw_strings, labels, module): 
+def naiveConsoleLabel(raw_strings, labels, module):
 
     print('\nStart console labeling!\n')
     valid_input_tags = OrderedDict([(str(i), label) for i, label in enumerate(labels)])
@@ -120,10 +120,10 @@ def naiveConsoleLabel(raw_strings, labels, module):
             print('\n(%s of %s)' % (i, total_strings))
             print('-'*50)
             print('STRING: %s' %raw_sequence)
-            
+
             tokens = module.tokenize(raw_sequence)
 
-            user_input = None 
+            user_input = None
             while user_input not in valid_responses :
 
                 sys.stderr.write('(t)ag / (s)kip / (f)inish tagging / (h)elp\n')
@@ -152,7 +152,7 @@ def naiveManualTag(raw_sequence, valid_input_tags):
             user_input_tag = sys.stdin.readline().strip()
             if user_input_tag in valid_input_tags:
                 valid_tag = True
-            elif user_input_tag in ('h', 'help', '?') : 
+            elif user_input_tag in ('h', 'help', '?') :
                 printHelp(valid_input_tags)
             elif user_input_tag == 'oops':
                 print('No worries! Let\'s start over in labeling this string')
@@ -160,7 +160,7 @@ def naiveManualTag(raw_sequence, valid_input_tags):
                 return sequence_labels_redo
             else:
                 print("That is not a valid tag. Type 'help' to see the valid inputs")
-            
+
         token_label = valid_input_tags[user_input_tag]
         sequence_labels.append((token, token_label))
     return sequence_labels
@@ -176,9 +176,9 @@ def printHelp(valid_input_tags):
 
 def getArgumentParser():
     arg_parser = ArgumentParser(description="Label some strings")
-    arg_parser.add_argument(dest="infile", 
+    arg_parser.add_argument(dest="infile",
                             help="input csv", metavar="FILE")
-    arg_parser.add_argument(dest="outfile", 
+    arg_parser.add_argument(dest="outfile",
                             help="output csv", metavar="FILE")
     arg_parser.add_argument("-n",
                             help="-n for naive labeling (if there isn't an existing .crfsuite settings file)", action="store_true")
@@ -200,18 +200,18 @@ def label(module, infile, outfile):
                 raise ValueError("%s does not seem to be a valid xml file"
                                  % outfile)
 
-    with open(infile, 'rU') as f :
+    with open(infile, 'r') as f :
         reader = csv.reader(f)
-
-        strings = set([row[0].decode('utf-8') for row in reader])
+        # read first element of csv per line, which should only have one element anyway
+        strings = set([row[0] for row in reader])
 
     labels = module.LABELS
 
     if module.TAGGER:
-        labeled_list, raw_strings_left = consoleLabel(strings, labels, module) 
+        labeled_list, raw_strings_left = consoleLabel(strings, labels, module)
     else:
         labeled_list, raw_strings_left = naiveConsoleLabel(strings, labels, module)
 
     data_prep_utils.appendListToXMLfile(labeled_list, module, outfile)
-    data_prep_utils.list2file(raw_strings_left, unlabeled_dir+'unlabeled_'+file_slug+'.csv')
+    data_prep_utils.list2file(raw_strings_left, unlabeled_dir+'unlabeled_'+file_slug)
 
