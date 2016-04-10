@@ -26,11 +26,11 @@ def appendListToXMLfile(labeled_list, module, filepath):
     parent_tag = module.PARENT_LABEL
     collection_XML = appendListToXML(labeled_list, collection_XML, parent_tag)
 
-    with open(filepath, 'w') as f :
-        f.write(etree.tostring(collection_XML, pretty_print = True)) 
+    with open(filepath, 'wb') as f :
+        f.write(etree.tostring(collection_XML, pretty_print = True, encoding='utf-8'))
 
 
-# given a list of labeled sequences to an xml list, 
+# given a list of labeled sequences to an xml list,
 # appends corresponding xml to existing xml
 # calls: sequence2XML
 # called by: appendListToXMLfile
@@ -63,17 +63,18 @@ def sequence2XML(labeled_sequence, parent_tag) :
 
 # clears formatting for an xml collection
 def stripFormatting(collection) :
-    collection.text = None 
+    collection.text = None
     for element in collection :
         element.text = None
         element.tail = None
-        
+
     return collection
 
 
 # writes a list of strings to a file
-def list2file(string_list, filepath):
-    with open(filepath, 'wb') as csvfile:
+def list2file(string_set, filepath):
+    with open(filepath, 'w') as csvfile:
         writer = csv.writer(csvfile, doublequote=True, quoting=csv.QUOTE_MINIMAL)
-        for string in string_list:
-            writer.writerow([string.encode('utf-8')])
+        for string in string_set:
+            writer.writerow([string])
+
